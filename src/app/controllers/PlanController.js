@@ -16,7 +16,7 @@ class PlanController {
       title: Yup.string().required(),
       duration: Yup.number()
         .positive()
-        .round()
+        .integer()
         .required(),
       price: Yup.number()
         .positive()
@@ -58,7 +58,7 @@ class PlanController {
       title: Yup.string(),
       duration: Yup.number()
         .positive()
-        .round(),
+        .integer(),
       price: Yup.number().positive(),
     });
 

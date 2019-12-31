@@ -1,3 +1,4 @@
+import * as Yup from "yup";
 import { addMonths, parseISO, isBefore } from "date-fns";
 
 import Registry from "../models/Registry";
@@ -15,6 +16,21 @@ class RegistryController {
   }
 
   async store(req, res) {
+    const schema = Yup.object().shape({
+      student_id: Yup.number()
+        .integer()
+        .positive()
+        .required(),
+      plan_id: Yup.number()
+        .integer()
+        .positive()
+        .required(),
+      start_date: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: "Validation failed" });
+    }
     const { student_id, plan_id, start_date } = req.body;
 
     const student = await Student.findByPk(student_id);
@@ -84,6 +100,18 @@ class RegistryController {
   }
 
   async update(req, res) {
+    const schema = Yup.object().shape({
+      plan_id: Yup.number()
+        .integer()
+        .positive()
+        .required(),
+      start_date: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: "Validation failed" });
+    }
+
     const { plan_id, start_date } = req.body;
 
     const student = await Student.findByPk(req.params.id);

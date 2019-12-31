@@ -1,4 +1,5 @@
-import Student from "../models/Student";
+import * as Yup from "yup";
+
 import HelpOrder from "../models/HelpOrder";
 
 class AnswerOrderController {
@@ -13,12 +14,22 @@ class AnswerOrderController {
   }
 
   async store(req, res) {
+    const schema = Yup.object().shape({
+      answer: Yup.string()
+        .required()
+        .strict(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: "Validation failed" });
+    }
+
     const helpOrder = await HelpOrder.findByPk(req.params.orderId);
 
     if (!helpOrder) {
       return res
         .status(400)
-        .json({ error: "No order was found for the id passed. " });
+        .json({ error: "No order was found for the id passed." });
     }
 
     if (helpOrder.answer) {
