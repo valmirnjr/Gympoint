@@ -5,6 +5,8 @@ import Registry from "../models/Registry";
 import Student from "../models/Student";
 import Plan from "../models/Plan";
 
+import Mail from "../../lib/Mail";
+
 class RegistryController {
   async index(req, res) {
     const registries = await Registry.findAll({
@@ -88,6 +90,15 @@ class RegistryController {
       start_date: parsedStartDate,
       end_date,
       price,
+    });
+
+    /**
+     * Send e-mail to student with his registry details
+     */
+    await Mail.sendMail({
+      to: `${student.name} <${student.email}>`,
+      subject: "Welcome to Gympoint",
+      text: "Have a great time with your new plan.",
     });
 
     return res.json({
