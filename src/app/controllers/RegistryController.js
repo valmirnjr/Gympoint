@@ -5,7 +5,8 @@ import Registry from "../models/Registry";
 import Student from "../models/Student";
 import Plan from "../models/Plan";
 
-import Mail from "../../lib/Mail";
+import RegistryMail from "../jobs/RegistryMail";
+import Queue from "../../lib/Queue";
 
 class RegistryController {
   async index(req, res) {
@@ -84,21 +85,28 @@ class RegistryController {
 
     const price = plan.duration * plan.price;
 
-    await Registry.create({
+    const registry = {
       student_id,
       plan_id,
       start_date: parsedStartDate,
       end_date,
       price,
-    });
+    };
+
+    await Registry.create(registry);
 
     /**
-     * Send e-mail to student with his registry details
+     * Send e-mail to student with his registry details through a queue
      */
-    await Mail.sendMail({
-      to: `${student.name} <${student.email}>`,
-      subject: "Welcome to Gympoint",
-      text: "Have a great time with your new plan.",
+    await Queue.add(RegistryMail.key, {
+      student: {
+        name: student.name,
+        email: student.email,
+      },
+      plan: {
+        title: plan.title,
+      },
+      registry,
     });
 
     return res.json({

@@ -1,6 +1,9 @@
 import * as Yup from "yup";
 
+import Student from "../models/Student";
 import HelpOrder from "../models/HelpOrder";
+
+import Mail from "../../lib/Mail";
 
 class AnswerOrderController {
   async index(req, res) {
@@ -25,6 +28,7 @@ class AnswerOrderController {
     }
 
     const helpOrder = await HelpOrder.findByPk(req.params.orderId);
+    const student = await Student.findByPk(helpOrder.student_id);
 
     if (!helpOrder) {
       return res
@@ -43,6 +47,20 @@ class AnswerOrderController {
     await helpOrder.update({
       answer,
       answer_at: new Date(),
+    });
+
+    /**
+     * Send e-mail to student with the answer to his help order
+     */
+    await Mail.sendMail({
+      to: `${student.name} <${student.email}>`,
+      subject: "Resposta à sua pergunta",
+      template: "helpOrder",
+      context: {
+        student: student.name,
+        question: helpOrder.question,
+        answer: helpOrder.answer,
+      },
     });
 
     return res.json({ success: "Answer sent." });
