@@ -1,9 +1,10 @@
 import Bee from "bee-queue";
 
 import RegistryMail from "../app/jobs/RegistryMail";
+import AnswerMail from "../app/jobs/AnswerMail";
 import redisConfig from "../config/redis";
 
-const jobs = [RegistryMail];
+const jobs = [RegistryMail, AnswerMail];
 
 class Queue {
   constructor() {
@@ -31,8 +32,12 @@ class Queue {
     jobs.forEach(job => {
       const { bee, handle } = this.queues[job.key];
 
-      bee.process(handle);
+      bee.on("failed", this.handleFailure).process(handle);
     });
+  }
+
+  handleFailure(job, err) {
+    console.log(`Queue ${job.queue.name}: FAILED`, err);
   }
 }
 

@@ -3,7 +3,8 @@ import * as Yup from "yup";
 import Student from "../models/Student";
 import HelpOrder from "../models/HelpOrder";
 
-import Mail from "../../lib/Mail";
+import AnswerMail from "../jobs/AnswerMail";
+import Queue from "../../lib/Queue";
 
 class AnswerOrderController {
   async index(req, res) {
@@ -52,14 +53,14 @@ class AnswerOrderController {
     /**
      * Send e-mail to student with the answer to his help order
      */
-    await Mail.sendMail({
-      to: `${student.name} <${student.email}>`,
-      subject: "Resposta à sua pergunta",
-      template: "helpOrder",
-      context: {
-        student: student.name,
+    await Queue.add(AnswerMail.key, {
+      student: {
+        name: student.name,
+        email: student.email,
+      },
+      helpOrder: {
         question: helpOrder.question,
-        answer: helpOrder.answer,
+        answer,
       },
     });
 
