@@ -11,7 +11,14 @@ import Queue from "../../lib/Queue";
 class RegistryController {
   async index(req, res) {
     const registries = await Registry.findAll({
-      attributes: ["student_id", "plan_id", "start_date", "end_date", "price"],
+      attributes: [
+        "student_id",
+        "plan_id",
+        "start_date",
+        "end_date",
+        "price",
+        "active",
+      ],
       order: ["student_id"],
     });
 

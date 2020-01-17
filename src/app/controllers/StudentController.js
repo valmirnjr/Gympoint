@@ -1,11 +1,36 @@
+import { Op } from "sequelize";
 import * as Yup from "yup";
-
 import { parseISO } from "date-fns";
 import differenceInYears from "date-fns/differenceInYears";
 
 import Student from "../models/Student";
 
 class StudentController {
+  async index(req, res) {
+    const nameFilter = req.query.q;
+    const idFilter = req.query.id;
+
+    /**
+     * If a query name was passed, then we look for it in the database
+     */
+    /* const queryOptions = nameFilter
+      ? {
+          name: { [Op.iLike]: `%${nameFilter}%` },
+        }
+      : true; */
+
+    const queryOptions = {
+      name: nameFilter ? { [Op.iLike]: `%${nameFilter}%` } : { [Op.ne]: null },
+      id: idFilter || { [Op.ne]: null },
+    };
+
+    const students = await Student.findAll({
+      where: queryOptions,
+    });
+
+    return res.json(students);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string().required(),
